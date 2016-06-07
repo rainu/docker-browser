@@ -2,8 +2,6 @@ FROM rainu/browser-base:16.04
 MAINTAINER rainu <rainu@raysha.de>
 ENV DEBIAN_FRONTEND noninteractive
 
-#echo "deb http://archive.canonical.com/ubuntu xenial partner" >> /etc/apt/sources.list &&\
-
 #install Flash
 RUN apt-get update &&\
         apt-get -y install software-properties-common &&\
