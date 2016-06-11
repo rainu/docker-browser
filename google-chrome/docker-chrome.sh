@@ -1,36 +1,99 @@
 #!/bin/bash
 
+####
+# Variables
+####
+
 DOCKER_IMAGE="rainu/chrome"
+
 CUR_USER_ID=$(id -u)
-DOCKER_NAME="chrome-$CUR_USER_ID"
 
 HOST_PROFILE="$HOME/.docker/$DOCKER_IMAGE"
 
-read -r -d '' DOCKER_COMMON_RUN_PARAMS <<EOF
---env LANG=$LANG 
---env LANGUAGE=$LANGUAGE 
---env DISPLAY=$DISPLAY 
---env PULSE_SERVER="unix:/tmp/pulse-unix" 
---volume /tmp/.X11-unix:/tmp/.X11-unix 
---volume /run/user/$CUR_USER_ID/pulse/native:/tmp/pulse-unix 
+CHROMIUM_ARGS="--no-sandbox"
+DOCKER_ARGS=""
+
+DOCKER_NAME="chrome-$CUR_USER_ID"
+read -r -d '' DOCKER_RUN_PARAMS <<EOF
+--env LANG=$LANG
+--env LANGUAGE=$LANGUAGE
+--env DISPLAY=$DISPLAY
+--env PULSE_SERVER="unix:/tmp/pulse-unix"
+--volume /tmp/.X11-unix:/tmp/.X11-unix
+--volume /run/user/$CUR_USER_ID/pulse/native:/tmp/pulse-unix
+--volume /usr/share/icons:/usr/share/icons:ro
 EOF
 
-execute()
-{
-        SCRIPT=$(mktemp)
+####
+# Functions
+####
 
-        echo $@ > $SCRIPT
-        chmod +x $SCRIPT
+execute() {
+	SCRIPT=$(mktemp)
 
-        $SCRIPT
-        RC=$?
-        rm $SCRIPT
+	echo $@ > $SCRIPT
+	chmod +x $SCRIPT
 
-        return $RC
+	$SCRIPT
+	RC=$?
+	rm $SCRIPT
+
+	return $RC
 }
 
-if [ "$1" = "-p" ]; then
-	DOCKER_NAME="chrome-$CUR_USER_ID-persistent"
+showHelp() {
+echo 'Starts the Chrome docker container.
+
+docker-chromium.sh [OPTIONS...]
+
+Options:
+	-h, -help
+		Shows this help text
+	-p, --persistent
+		History and custom settings are stored in a host directory (volume)
+	-D, --docker
+		Additional argument to docker command
+    -x, --xarg
+		Argument(s) for the underlying Chrome
+'
+	exit 0
+}
+
+readArguments() {
+	while [[ $# > 0 ]]; do
+		key="$1"
+
+		case $key in
+		    -p|--persistent)
+		    PERSISTENT="true"
+		    DOCKER_NAME="$DOCKER_NAME-persistent"
+		    ;;
+		    -x|-xargs)
+		    CHROMIUM_ARGS=$CHROMIUM_ARGS" $2"
+		    shift
+		    ;;
+		    -D|--docker)
+		    DOCKER_ARGS=$DOCKER_ARGS" $2"
+		    shift
+		    ;;
+		    -h|--help)
+		    showHelp
+		    ;;
+		    *)
+			    # unknown option
+		    ;;
+		esac
+		shift # past argument or value
+	done
+}
+
+####
+# Main
+####
+
+readArguments "$@"
+
+if [ "$PERSISTENT" = "true" ]; then
 	DOCKER_CONTAINER_EXISTS=$(docker ps -a | grep $DOCKER_NAME | wc -l)
 
 	if [ "$DOCKER_CONTAINER_EXISTS" == "0" ]; then
@@ -41,8 +104,10 @@ if [ "$1" = "-p" ]; then
 		    --detach \
 		    --name "$DOCKER_NAME" \
 		    --volume $HOST_PROFILE:/home/browser/.chrome \
-		    $DOCKER_COMMON_RUN_PARAMS \
-		    $DOCKER_IMAGE
+		    $DOCKER_RUN_PARAMS \
+		    $DOCKER_ARGS \
+		    $DOCKER_IMAGE \
+		    $CHROMIUM_ARGS
 	else
 		execute docker start $DOCKER_NAME
 	fi
@@ -51,4 +116,4 @@ if [ "$1" = "-p" ]; then
 	exit $?
 fi
 
-execute docker run --rm -i $DOCKER_COMMON_RUN_PARAMS $DOCKER_IMAGE
+execute docker run --rm -i $DOCKER_RUN_PARAMS $DOCKER_ARGS $DOCKER_IMAGE $CHROMIUM_ARGS

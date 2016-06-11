@@ -103,7 +103,7 @@ if [ "$PERSISTENT" = "true" ]; then
 		execute docker run \
 		    --detach \
 		    --name "$DOCKER_NAME" \
-		    --volume $HOST_PROFILE:/home/browser/.mozilla \
+		    --volume $HOST_PROFILE:/home/browser/.chromium \
 		    $DOCKER_RUN_PARAMS \
 		    $DOCKER_ARGS \
 		    $DOCKER_IMAGE \
