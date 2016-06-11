@@ -104,7 +104,7 @@ if [ "$PERSISTENT" = "true" ]; then
 		    --detach \
 		    --name "$DOCKER_NAME" \
 		    --volume $HOST_PROFILE:/home/browser/.mozilla \
-		    $DOCKER_COMMON_RUN_PARAMS \
+		    $DOCKER_RUN_PARAMS \
 		    $DOCKER_ARGS \
 		    $DOCKER_IMAGE \
 		    $FIREFOX_ARGS
@@ -116,4 +116,4 @@ if [ "$PERSISTENT" = "true" ]; then
 	exit $?
 fi
 
-execute docker run --rm -i $DOCKER_COMMON_RUN_PARAMS $DOCKER_ARGS $DOCKER_IMAGE $FIREFOX_ARGS
+execute docker run --rm -i $DOCKER_RUN_PARAMS $DOCKER_ARGS $DOCKER_IMAGE $FIREFOX_ARGS
