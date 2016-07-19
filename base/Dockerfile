@@ -20,8 +20,6 @@ RUN apt-get update &&\
 #             in read-only mode when starting the container. 
 RUN echo "enable-shm = no" >> /etc/pulse/client.conf
 
-RUN export uid=1000 gid=1000 && \
-    mkdir -p /home/browser && \
-    echo "browser:x:${uid}:${gid}:Browser User,,,:/home/browser:/bin/bash" >> /etc/passwd && \
-    echo "browser:x:${uid}:" >> /etc/group && \
-    chown ${uid}:${gid} -R /home/browser
+RUN export USER_HOME=/home/browser && \
+    useradd -u 1000 -m -d $USER_HOME -s /bin/bash -G video,audio browser && \
+    chown browser -R $USER_HOME
