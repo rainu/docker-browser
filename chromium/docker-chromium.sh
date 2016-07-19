@@ -59,6 +59,18 @@ Options:
 	exit 0
 }
 
+appendDevices() {
+	declare -a DRI_DEVICES
+	for d in `find /dev/dri -type c` ; do
+	        DRI_DEVICES+=(--device "${d}")
+	done
+	for d in `find /dev/ -name "*video*" -type c`; do
+	        DRI_DEVICES+=(--device "${d}")
+	done
+
+	DOCKER_ARGS="$DOCKER_ARGS ${DRI_DEVICES[@]}"
+}
+
 readArguments() {
 	while [[ $# > 0 ]]; do
 		key="$1"
@@ -91,6 +103,7 @@ readArguments() {
 # Main
 ####
 
+appendDevices
 readArguments "$@"
 
 if [ "$PERSISTENT" = "true" ]; then
