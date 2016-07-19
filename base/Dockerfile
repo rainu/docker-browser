@@ -7,7 +7,7 @@ RUN apt-get update &&\
 	apt-get -y install software-properties-common &&\
 	apt-add-repository multiverse &&\
 	apt-get update &&\ 
-	apt-get -y install dbus-x11 pulseaudio &&\
+	apt-get -y install dbus-x11 pulseaudio gstreamer1.0-pulseaudio gstreamer1.0-plugins-good ubuntu-restricted-extras libgl1-mesa-glx-lts-vivid libgl1-mesa-dri-lts-vivid libtxc-dxtn-s2tc0 mesa-vdpau-drivers-lts-vivid libvdpau-va-gl1 i965-va-driver vdpau-va-driver &&\
 	apt-add-repository --remove multiverse &&\
 	apt-get -y remove software-properties-common &&\
 	apt-get -y autoremove &&\
