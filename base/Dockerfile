@@ -14,6 +14,12 @@ RUN apt-get update &&\
 	apt-get clean &&\
 	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Workaround: pulseaudio client library likes to remove /dev/shm/pulse-shm-* 
+#             files created by the host, causing sound to stop working. 
+#             To fix this, we either want to disable the shm or mount /dev/shm 
+#             in read-only mode when starting the container. 
+RUN echo "enable-shm = no" >> /etc/pulse/client.conf
+
 RUN export uid=1000 gid=1000 && \
     mkdir -p /home/browser && \
     echo "browser:x:${uid}:${gid}:Browser User,,,:/home/browser:/bin/bash" >> /etc/passwd && \
